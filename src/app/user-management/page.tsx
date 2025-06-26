@@ -421,7 +421,7 @@ export default function UserManagementPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Toplam Kullanıcı</CardTitle>
@@ -552,89 +552,176 @@ export default function UserManagementPage() {
               </div>
             ) : (
               <>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Kullanıcı</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Rol</TableHead>
-                        <TableHead>Durum</TableHead>
-                        <TableHead className="text-right">İşlemler</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {users.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">{user.username}</div>
-                              <div className="text-sm text-muted-foreground">
-                                {user.email}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>{user.email}</TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant="secondary" 
-                              className={`${getRoleBadgeColor(user.role)} flex items-center gap-1 w-fit`}
-                            >
-                              {getRoleIcon(user.role)}
-                              {user.role}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={user.isActive !== false ? "default" : "secondary"}>
-                              {user.isActive !== false ? 'Aktif' : 'Pasif'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>İşlemler</DropdownMenuLabel>
-                                <DropdownMenuItem onClick={() => openEditForm(user)}>
-                                  <Edit className="mr-2 h-4 w-4" />
-                                  Düzenle
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleToggleStatus(user)}>
-                                  {user.isActive !== false ? (
-                                    <UserX className="mr-2 h-4 w-4" />
-                                  ) : (
-                                    <UserCheck className="mr-2 h-4 w-4" />
-                                  )}
-                                  {user.isActive !== false ? 'Pasif Yap' : 'Aktif Yap'}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => openPasswordDialog(user)}>
-                                  <Key className="mr-2 h-4 w-4" />
-                                  Şifre Değiştir
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={() => openDeleteDialog(user)}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Sil
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
+                {/* Desktop Table View */}
+                <div className="hidden md:block">
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Kullanıcı</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Rol</TableHead>
+                          <TableHead>Durum</TableHead>
+                          <TableHead className="text-right">İşlemler</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {users.map((user) => (
+                          <TableRow key={user.id}>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">{user.username}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  {user.email}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{user.email}</TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant="secondary" 
+                                className={`${getRoleBadgeColor(user.role)} flex items-center gap-1 w-fit`}
+                              >
+                                {getRoleIcon(user.role)}
+                                {user.role}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={user.isActive !== false ? "default" : "secondary"}>
+                                {user.isActive !== false ? 'Aktif' : 'Pasif'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>İşlemler</DropdownMenuLabel>
+                                  <DropdownMenuItem onClick={() => openEditForm(user)}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Düzenle
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleToggleStatus(user)}>
+                                    {user.isActive !== false ? (
+                                      <UserX className="mr-2 h-4 w-4" />
+                                    ) : (
+                                      <UserCheck className="mr-2 h-4 w-4" />
+                                    )}
+                                    {user.isActive !== false ? 'Pasif Yap' : 'Aktif Yap'}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => openPasswordDialog(user)}>
+                                    <Key className="mr-2 h-4 w-4" />
+                                    Şifre Değiştir
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    onClick={() => openDeleteDialog(user)}
+                                    className="text-red-600"
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Sil
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-4">
+                  {users.map((user) => (
+                    <Card key={user.id} className="p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center w-10 h-10 bg-muted rounded-full">
+                            {getRoleIcon(user.role)}
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-lg">{user.username}</h3>
+                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                          </div>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Kullanıcı İşlemleri</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => openEditForm(user)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Düzenle
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleToggleStatus(user)}>
+                              {user.isActive !== false ? (
+                                <UserX className="mr-2 h-4 w-4" />
+                              ) : (
+                                <UserCheck className="mr-2 h-4 w-4" />
+                              )}
+                              {user.isActive !== false ? 'Pasif Yap' : 'Aktif Yap'}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openPasswordDialog(user)}>
+                              <Key className="mr-2 h-4 w-4" />
+                              Şifre Değiştir
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => openDeleteDialog(user)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Sil
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <span className="text-muted-foreground block mb-1">Rol:</span>
+                          <Badge 
+                            variant="secondary" 
+                            className={`${getRoleBadgeColor(user.role)} flex items-center gap-1 w-fit`}
+                          >
+                            {getRoleIcon(user.role)}
+                            {user.role}
+                          </Badge>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground block mb-1">Durum:</span>
+                          <Badge variant={user.isActive !== false ? "default" : "secondary"}>
+                            {user.isActive !== false ? 'Aktif' : 'Pasif'}
+                          </Badge>
+                        </div>
+                        <div className="col-span-2">
+                          <span className="text-muted-foreground block mb-1">Email:</span>
+                          <div className="text-sm font-medium">{user.email}</div>
+                        </div>
+                        {onlineUsers.some(ou => ou.id === user.id) && (
+                          <div className="col-span-2">
+                            <div className="flex items-center gap-2 text-green-600">
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              <span className="text-sm font-medium">Çevrimiçi</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  ))}
                 </div>
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between space-x-2 py-4">
-                    <div className="text-sm text-muted-foreground">
+                  <div className="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0 sm:space-x-2 py-4">
+                    <div className="text-sm text-muted-foreground text-center sm:text-left">
                       Sayfa {currentPage} / {totalPages} (Toplam {totalUsers} kayıt)
                     </div>
                     <div className="flex space-x-2">

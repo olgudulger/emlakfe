@@ -389,7 +389,7 @@ export default function LocationsPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Toplam İl</CardTitle>
@@ -459,41 +459,189 @@ export default function LocationsPage() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-2">
-                {filteredProvinces.map((province) => (
-                  <div key={province.id} className="border rounded-lg">
-                    {/* Province */}
-                    <div className="flex items-center justify-between p-4 hover:bg-muted/50">
-                      <div className="flex items-center gap-3">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleProvinceExpansion(province.id)}
-                          className="p-0 h-auto"
-                        >
-                          {expandedProvinces.has(province.id) ? (
-                            <ChevronDown className="h-4 w-4" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <Building className="h-5 w-5 text-blue-600" />
-                        <div>
-                          <div className="font-semibold">{province.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {getDistrictsForProvince(province.id).length} ilçe
+              <>
+                {/* Desktop Tree View */}
+                <div className="hidden md:block space-y-2">
+                  {filteredProvinces.map((province) => (
+                    <div key={province.id} className="border rounded-lg">
+                      {/* Province */}
+                      <div className="flex items-center justify-between p-4 hover:bg-muted/50">
+                        <div className="flex items-center gap-3">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleProvinceExpansion(province.id)}
+                            className="p-0 h-auto"
+                          >
+                            {expandedProvinces.has(province.id) ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <Building className="h-5 w-5 text-blue-600" />
+                          <div>
+                            <div className="font-semibold">{province.name}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {getDistrictsForProvince(province.id).length} ilçe
+                            </div>
                           </div>
                         </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openCreateForm('district', province.id)}
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            İlçe Ekle
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>İşlemler</DropdownMenuLabel>
+                              <DropdownMenuItem onClick={() => openEditForm('province', province)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Düzenle
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => openDeleteDialog('province', province)}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Sil
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openCreateForm('district', province.id)}
-                        >
-                          <Plus className="h-4 w-4 mr-1" />
-                          İlçe Ekle
-                        </Button>
+
+                      {/* Districts */}
+                      {expandedProvinces.has(province.id) && (
+                        <div className="border-t bg-muted/30">
+                          {getDistrictsForProvince(province.id).map((district) => (
+                            <div key={district.id} className="border-b last:border-b-0">
+                              <div className="flex items-center justify-between p-4 pl-12 hover:bg-muted/50">
+                                <div className="flex items-center gap-3">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => toggleDistrictExpansion(district.id)}
+                                    className="p-0 h-auto"
+                                  >
+                                    {expandedDistricts.has(district.id) ? (
+                                      <ChevronDown className="h-4 w-4" />
+                                    ) : (
+                                      <ChevronRight className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                  <TreeDeciduous className="h-4 w-4 text-green-600" />
+                                  <div>
+                                    <div className="font-medium">{district.name}</div>
+                                    <div className="text-sm text-muted-foreground">
+                                      {getNeighborhoodsForDistrict(district.id).length} mahalle
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => openCreateForm('neighborhood', district.id)}
+                                  >
+                                    <Plus className="h-4 w-4 mr-1" />
+                                    Mahalle Ekle
+                                  </Button>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" className="h-8 w-8 p-0">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuLabel>İşlemler</DropdownMenuLabel>
+                                      <DropdownMenuItem onClick={() => openEditForm('district', district)}>
+                                        <Edit className="mr-2 h-4 w-4" />
+                                        Düzenle
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        onClick={() => openDeleteDialog('district', district)}
+                                        className="text-red-600"
+                                      >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Sil
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                              </div>
+
+                              {/* Neighborhoods */}
+                              {expandedDistricts.has(district.id) && (
+                                <div className="bg-muted/50">
+                                  {getNeighborhoodsForDistrict(district.id).map((neighborhood) => (
+                                    <div key={neighborhood.id} className="flex items-center justify-between p-4 pl-20 border-b last:border-b-0 hover:bg-muted/70">
+                                      <div className="flex items-center gap-3">
+                                        <MapPin className="h-4 w-4 text-purple-600" />
+                                        <div>
+                                          <div className="font-medium">{neighborhood.name}</div>
+                                          <div className="text-sm text-muted-foreground">Mahalle</div>
+                                        </div>
+                                      </div>
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <Button variant="ghost" className="h-8 w-8 p-0">
+                                            <MoreHorizontal className="h-4 w-4" />
+                                          </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                          <DropdownMenuLabel>İşlemler</DropdownMenuLabel>
+                                          <DropdownMenuItem onClick={() => openEditForm('neighborhood', neighborhood)}>
+                                            <Edit className="mr-2 h-4 w-4" />
+                                            Düzenle
+                                          </DropdownMenuItem>
+                                          <DropdownMenuSeparator />
+                                          <DropdownMenuItem
+                                            onClick={() => openDeleteDialog('neighborhood', neighborhood)}
+                                            className="text-red-600"
+                                          >
+                                            <Trash2 className="mr-2 h-4 w-4" />
+                                            Sil
+                                          </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-4">
+                  {filteredProvinces.map((province) => (
+                    <Card key={province.id} className="p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex items-center gap-3">
+                          <Building className="h-5 w-5 text-blue-600" />
+                          <div>
+                            <h3 className="font-semibold text-lg">{province.name}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {getDistrictsForProvince(province.id).length} ilçe
+                            </p>
+                          </div>
+                        </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -501,10 +649,14 @@ export default function LocationsPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>İşlemler</DropdownMenuLabel>
+                            <DropdownMenuLabel>İl İşlemleri</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => openCreateForm('district', province.id)}>
+                              <Plus className="mr-2 h-4 w-4" />
+                              İlçe Ekle
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openEditForm('province', province)}>
                               <Edit className="mr-2 h-4 w-4" />
-                              Düzenle
+                              İl Düzenle
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -512,119 +664,138 @@ export default function LocationsPage() {
                               className="text-red-600"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
-                              Sil
+                              İl Sil
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
-                    </div>
 
-                    {/* Districts */}
-                    {expandedProvinces.has(province.id) && (
-                      <div className="border-t bg-muted/30">
-                        {getDistrictsForProvince(province.id).map((district) => (
-                          <div key={district.id} className="border-b last:border-b-0">
-                            <div className="flex items-center justify-between p-4 pl-12 hover:bg-muted/50">
-                              <div className="flex items-center gap-3">
+                      {/* Districts in Mobile */}
+                      <div className="space-y-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toggleProvinceExpansion(province.id)}
+                          className="w-full"
+                        >
+                          {expandedProvinces.has(province.id) ? (
+                            <>
+                              <ChevronDown className="mr-2 h-4 w-4" />
+                              İlçeleri Gizle
+                            </>
+                          ) : (
+                            <>
+                              <ChevronRight className="mr-2 h-4 w-4" />
+                              İlçeleri Göster
+                            </>
+                          )}
+                        </Button>
+
+                        {expandedProvinces.has(province.id) && (
+                          <div className="space-y-2 pl-4 border-l-2 border-muted">
+                            {getDistrictsForProvince(province.id).map((district) => (
+                              <div key={district.id} className="bg-muted/30 rounded-lg p-3">
+                                <div className="flex justify-between items-start mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <TreeDeciduous className="h-4 w-4 text-green-600" />
+                                    <div>
+                                      <div className="font-medium">{district.name}</div>
+                                      <div className="text-xs text-muted-foreground">
+                                        {getNeighborhoodsForDistrict(district.id).length} mahalle
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" className="h-6 w-6 p-0">
+                                        <MoreHorizontal className="h-3 w-3" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuLabel>İlçe İşlemleri</DropdownMenuLabel>
+                                      <DropdownMenuItem onClick={() => openCreateForm('neighborhood', district.id)}>
+                                        <Plus className="mr-2 h-4 w-4" />
+                                        Mahalle Ekle
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => openEditForm('district', district)}>
+                                        <Edit className="mr-2 h-4 w-4" />
+                                        İlçe Düzenle
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        onClick={() => openDeleteDialog('district', district)}
+                                        className="text-red-600"
+                                      >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        İlçe Sil
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+
+                                {/* Neighborhoods in Mobile */}
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => toggleDistrictExpansion(district.id)}
-                                  className="p-0 h-auto"
+                                  className="w-full text-xs p-1 h-auto"
                                 >
                                   {expandedDistricts.has(district.id) ? (
-                                    <ChevronDown className="h-4 w-4" />
+                                    <>
+                                      <ChevronDown className="mr-1 h-3 w-3" />
+                                      Mahalleleri Gizle
+                                    </>
                                   ) : (
-                                    <ChevronRight className="h-4 w-4" />
+                                    <>
+                                      <ChevronRight className="mr-1 h-3 w-3" />
+                                      Mahalleleri Göster
+                                    </>
                                   )}
                                 </Button>
-                                <TreeDeciduous className="h-4 w-4 text-green-600" />
-                                <div>
-                                  <div className="font-medium">{district.name}</div>
-                                  <div className="text-sm text-muted-foreground">
-                                    {getNeighborhoodsForDistrict(district.id).length} mahalle
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => openCreateForm('neighborhood', district.id)}
-                                >
-                                  <Plus className="h-4 w-4 mr-1" />
-                                  Mahalle Ekle
-                                </Button>
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="h-8 w-8 p-0">
-                                      <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>İşlemler</DropdownMenuLabel>
-                                    <DropdownMenuItem onClick={() => openEditForm('district', district)}>
-                                      <Edit className="mr-2 h-4 w-4" />
-                                      Düzenle
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                      onClick={() => openDeleteDialog('district', district)}
-                                      className="text-red-600"
-                                    >
-                                      <Trash2 className="mr-2 h-4 w-4" />
-                                      Sil
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            </div>
 
-                            {/* Neighborhoods */}
-                            {expandedDistricts.has(district.id) && (
-                              <div className="bg-muted/50">
-                                {getNeighborhoodsForDistrict(district.id).map((neighborhood) => (
-                                  <div key={neighborhood.id} className="flex items-center justify-between p-4 pl-20 border-b last:border-b-0 hover:bg-muted/70">
-                                    <div className="flex items-center gap-3">
-                                      <MapPin className="h-4 w-4 text-purple-600" />
-                                      <div>
-                                        <div className="font-medium">{neighborhood.name}</div>
-                                        <div className="text-sm text-muted-foreground">Mahalle</div>
+                                {expandedDistricts.has(district.id) && (
+                                  <div className="space-y-1 mt-2 pl-3 border-l border-muted">
+                                    {getNeighborhoodsForDistrict(district.id).map((neighborhood) => (
+                                      <div key={neighborhood.id} className="flex justify-between items-center p-2 bg-muted/50 rounded text-sm">
+                                        <div className="flex items-center gap-2">
+                                          <MapPin className="h-3 w-3 text-purple-600" />
+                                          <span className="font-medium">{neighborhood.name}</span>
+                                        </div>
+                                        <DropdownMenu>
+                                          <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" className="h-5 w-5 p-0">
+                                              <MoreHorizontal className="h-3 w-3" />
+                                            </Button>
+                                          </DropdownMenuTrigger>
+                                          <DropdownMenuContent align="end">
+                                            <DropdownMenuLabel>Mahalle İşlemleri</DropdownMenuLabel>
+                                            <DropdownMenuItem onClick={() => openEditForm('neighborhood', neighborhood)}>
+                                              <Edit className="mr-2 h-4 w-4" />
+                                              Düzenle
+                                            </DropdownMenuItem>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem
+                                              onClick={() => openDeleteDialog('neighborhood', neighborhood)}
+                                              className="text-red-600"
+                                            >
+                                              <Trash2 className="mr-2 h-4 w-4" />
+                                              Sil
+                                            </DropdownMenuItem>
+                                          </DropdownMenuContent>
+                                        </DropdownMenu>
                                       </div>
-                                    </div>
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="h-8 w-8 p-0">
-                                          <MoreHorizontal className="h-4 w-4" />
-                                        </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end">
-                                        <DropdownMenuLabel>İşlemler</DropdownMenuLabel>
-                                        <DropdownMenuItem onClick={() => openEditForm('neighborhood', neighborhood)}>
-                                          <Edit className="mr-2 h-4 w-4" />
-                                          Düzenle
-                                        </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem
-                                          onClick={() => openDeleteDialog('neighborhood', neighborhood)}
-                                          className="text-red-600"
-                                        >
-                                          <Trash2 className="mr-2 h-4 w-4" />
-                                          Sil
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
+                                    ))}
                                   </div>
-                                ))}
+                                )}
                               </div>
-                            )}
+                            ))}
                           </div>
-                        ))}
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+                    </Card>
+                  ))}
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
