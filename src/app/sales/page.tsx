@@ -10,13 +10,12 @@ import {
   Filter,
   Eye,
   Edit,
-  Trash2,
+  XCircle,
   DollarSign,
   Calendar,
   TrendingUp,
   CheckCircle,
   Clock,
-  XCircle,
   PauseCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -126,9 +125,9 @@ export default function SalesPage() {
   console.log('Completed sales (status=1):', completedSales.length);
   console.log('Final displayStats:', displayStats);
 
-  // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => saleService.deleteSale(id),
+  // Cancel mutation
+  const cancelMutation = useMutation({
+    mutationFn: (id: number) => saleService.cancelSale(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sales'] });
       queryClient.invalidateQueries({ queryKey: ['sales-dashboard'] });
@@ -137,12 +136,13 @@ export default function SalesPage() {
     },
   });
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Bu satışı silmek istediğinizden emin misiniz?')) {
+  const handleCancel = async (id: number) => {
+    if (window.confirm('Bu satışı iptal etmek istediğinizden emin misiniz?')) {
       try {
-        await deleteMutation.mutateAsync(id);
-      } catch (error) {
-        console.error('Delete failed:', error);
+        await cancelMutation.mutateAsync(id);
+      } catch (error: any) {
+        console.error('Cancel failed:', error);
+        alert(error.message || 'Satış iptal edilemedi');
       }
     }
   };
@@ -460,10 +460,12 @@ export default function SalesPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleDelete(sale.id)}
-                                className="text-red-600 hover:text-red-900"
+                                onClick={() => handleCancel(sale.id)}
+                                className="text-orange-600 hover:text-orange-700"
+                                disabled={sale.status === 3} // SaleStatus.Cancelled
+                                title={sale.status === 3 ? "Zaten iptal edilmiş" : "Satışı iptal et"}
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <XCircle className="h-4 w-4" />
                               </Button>
                             </div>
                           </TableCell>
@@ -527,10 +529,12 @@ export default function SalesPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleDelete(sale.id)}
-                                className="text-red-600 hover:text-red-900"
+                                onClick={() => handleCancel(sale.id)}
+                                className="text-orange-600 hover:text-orange-700"
+                                disabled={sale.status === 3} // SaleStatus.Cancelled
+                                title={sale.status === 3 ? "Zaten iptal edilmiş" : "Satışı iptal et"}
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <XCircle className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>

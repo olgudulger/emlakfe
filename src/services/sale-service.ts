@@ -201,6 +201,52 @@ export class SaleService {
     }
   }
 
+  async cancelSale(id: number): Promise<Sale> {
+    try {
+      console.log(`Cancelling sale with ID: ${id}`);
+      
+      // Önce sale bilgilerini al
+      const sale = await this.getSaleById(id);
+      console.log('Sale to be cancelled:', sale);
+      
+      // Eğer sale zaten iptal edilmişse error fırlat
+      if (sale.status === SaleStatus.Cancelled) {
+        throw new Error('Bu satış zaten iptal edilmiş');
+      }
+      
+      // Sale'i iptal edildi statüsüne güncelle
+      const updateData: UpdateSaleRequest = {
+        id: sale.id,
+        propertyId: sale.propertyId,
+        buyerCustomerId: sale.buyerCustomerId,
+        salePrice: sale.salePrice,
+        commission: sale.commission,
+        expenses: sale.expenses || 0,
+        commissionRate: sale.commissionRate || 0,
+        saleDate: sale.saleDate,
+        notes: sale.notes || '',
+        status: SaleStatus.Cancelled
+      };
+      
+      const updatedSale = await this.updateSale(updateData);
+      
+      console.log('Sale cancelled successfully');
+      
+      // Eğer sale daha önce tamamlanmışsa emlak durumunu geri döndür
+      if (sale.status === SaleStatus.Completed) {
+        await this.revertPropertyStatusAfterSaleDeletion(sale.propertyId, sale);
+      } else {
+        console.log('Sale was not completed, no property status update needed');
+      }
+      
+      return updatedSale;
+      
+    } catch (error) {
+      console.error('Failed to cancel sale:', error);
+      throw error;
+    }
+  }
+
   async deleteSale(id: number): Promise<void> {
     try {
       console.log(`Deleting sale with ID: ${id}`);
