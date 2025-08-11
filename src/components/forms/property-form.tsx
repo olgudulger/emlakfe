@@ -40,8 +40,18 @@ const basePropertySchema = z.object({
   provinceId: z.number().min(1, 'Şehir seçilmelidir'),
   districtId: z.number().min(1, 'İlçe seçilmelidir'),
   neighborhoodId: z.number().min(1, 'Mahalle seçilmelidir'),
-  intermediaryFullName: z.string().min(1, 'Aracı adı gereklidir'),
-  intermediaryPhone: z.string().min(10, 'Geçerli telefon numarası giriniz'),
+  // Aracı bilgileri opsiyonel: boş bırakılabilir
+  intermediaryFullName: z.union([
+    z.literal(''),
+    z.string().min(1, 'Aracı adı gereklidir')
+  ]),
+  intermediaryPhone: z.union([
+    z.literal(''),
+    z
+      .string()
+      .min(10, 'Geçerli telefon numarası giriniz')
+      .max(11, 'Telefon numarası en fazla 11 haneli olmalıdır')
+  ]),
   status: z.enum(['Satılık', 'Kiralık', 'SatılıkKiralık', 'Rezerv', 'Satıldı', 'Kiralandı'], { required_error: 'Durum seçilmelidir' }),
   notes: z.string().optional(),
   customerId: z.number().min(1, 'Müşteri seçilmelidir'),
@@ -454,8 +464,8 @@ export function PropertyForm({ property, onSubmit, onCancel, isLoading }: Proper
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="BlockNumber">Blok Numarası</Label>
-                  <Input {...register('BlockNumber')} placeholder="Blok numarası" />
+                  <Label htmlFor="BlockNumber">Ada Numarası</Label>
+                  <Input {...register('BlockNumber')} placeholder="Ada numarası" />
                 </div>
                 <div>
                   <Label htmlFor="ParcelNumber">Parsel Numarası</Label>
@@ -535,8 +545,8 @@ export function PropertyForm({ property, onSubmit, onCancel, isLoading }: Proper
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="BlockNumber">Blok Numarası</Label>
-                  <Input {...register('BlockNumber')} placeholder="Blok numarası" />
+                  <Label htmlFor="BlockNumber">Ada Numarası</Label>
+                  <Input {...register('BlockNumber')} placeholder="Ada numarası" />
                 </div>
                 <div>
                   <Label htmlFor="ParcelNumber">Parsel Numarası</Label>
@@ -897,8 +907,8 @@ export function PropertyForm({ property, onSubmit, onCancel, isLoading }: Proper
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="BlockNumber">Blok Numarası</Label>
-                  <Input {...register('BlockNumber')} placeholder="Blok numarası" />
+                  <Label htmlFor="BlockNumber">Ada Numarası</Label>
+                  <Input {...register('BlockNumber')} placeholder="Ada numarası" />
                 </div>
                 <div>
                   <Label htmlFor="ParcelNumber">Parsel Numarası</Label>
@@ -997,7 +1007,7 @@ export function PropertyForm({ property, onSubmit, onCancel, isLoading }: Proper
             </div>
 
             <div>
-              <Label htmlFor="intermediaryFullName">Aracı Adı *</Label>
+              <Label htmlFor="intermediaryFullName">Aracı Adı</Label>
               <Input
                 {...register('intermediaryFullName')}
                 placeholder="Aracı kişinin tam adı"
@@ -1009,8 +1019,11 @@ export function PropertyForm({ property, onSubmit, onCancel, isLoading }: Proper
             </div>
 
             <div>
-              <Label htmlFor="intermediaryPhone">Aracı Telefonu *</Label>
+              <Label htmlFor="intermediaryPhone">Aracı Telefonu</Label>
               <Input
+                maxLength={11}
+                inputMode="numeric"
+                pattern="\d*"
                 {...register('intermediaryPhone')}
                 placeholder="05xxxxxxxxx"
                 className={errors.intermediaryPhone ? 'border-red-500' : ''}

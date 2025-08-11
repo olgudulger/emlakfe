@@ -371,7 +371,7 @@ export function PropertyDetailDialog({ property, isOpen, onClose, customerName, 
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-sm font-medium text-muted-foreground">Blok No:</span>
+                  <span className="text-sm font-medium text-muted-foreground">Ada Numarası:</span>
                   <p className="text-sm">{typeProperties.BlockNumber || 'Belirtilmemiş'}</p>
                 </div>
                 <div>
@@ -412,7 +412,7 @@ export function PropertyDetailDialog({ property, isOpen, onClose, customerName, 
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-sm font-medium text-muted-foreground">Blok No:</span>
+                  <span className="text-sm font-medium text-muted-foreground">Ada Numarası:</span>
                   <p className="text-sm">{typeProperties.BlockNumber || 'Belirtilmemiş'}</p>
                 </div>
                 <div>
@@ -571,7 +571,7 @@ export function PropertyDetailDialog({ property, isOpen, onClose, customerName, 
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-sm font-medium text-muted-foreground">Blok No:</span>
+                  <span className="text-sm font-medium text-muted-foreground">Ada Numarası:</span>
                   <p className="text-sm">{typeProperties.BlockNumber || 'Belirtilmemiş'}</p>
                 </div>
                 <div>

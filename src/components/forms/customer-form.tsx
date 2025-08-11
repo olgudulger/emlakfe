@@ -14,7 +14,10 @@ import { Loader2 } from 'lucide-react';
 
 const customerSchema = z.object({
   fullName: z.string().min(2, 'Ad soyad en az 2 karakter olmalıdır'),
-  phone: z.string().min(10, 'Geçerli bir telefon numarası girin'),
+  phone: z
+    .string()
+    .min(10, 'Geçerli bir telefon numarası girin')
+    .max(11, 'Telefon numarası en fazla 11 haneli olmalıdır'),
   budget: z.number().min(0, 'Bütçe 0 veya daha büyük olmalıdır'),
   notes: z.string().optional(),
   interestType: z.nativeEnum(InterestType, {
@@ -117,6 +120,9 @@ export function CustomerForm({ customer, onSubmit, isLoading, onCancel }: Custom
               <Label htmlFor="phone">Telefon</Label>
               <Input
                 id="phone"
+                 maxLength={11}
+                 inputMode="numeric"
+                 pattern="\d*"
                 {...form.register('phone')}
                 className={form.formState.errors.phone ? 'border-red-500' : ''}
                 placeholder="Örn: 05341234567"
