@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   PropertyType, 
@@ -65,6 +66,7 @@ const basePropertySchema = z.object({
   LandType: z.union([z.number(), z.string()]).optional(),
   RoadStatus: z.string().optional(),
   FieldType: z.union([z.number(), z.string()]).optional(),
+  HasShareholder: z.boolean().optional(),
   Floor: z.string().optional(),
   RoomCount: z.number().optional(),
   BathroomCount: z.number().optional(),
@@ -599,6 +601,19 @@ export function PropertyForm({ property, onSubmit, onCancel, isLoading }: Proper
                       <SelectItem value="Belirsiz">Belirsiz</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="HasShareholder"
+                    {...register('HasShareholder')}
+                    checked={watch('HasShareholder') || false}
+                    onCheckedChange={(checked: boolean) => {
+                      setValue('HasShareholder', checked === true);
+                    }}
+                  />
+                  <Label htmlFor="HasShareholder" className="cursor-pointer">
+                    Hissedar Var mı?
+                  </Label>
                 </div>
               </div>
             </CardContent>

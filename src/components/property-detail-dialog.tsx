@@ -439,6 +439,10 @@ export function PropertyDetailDialog({ property, isOpen, onClose, customerName, 
                   <span className="text-sm font-medium text-muted-foreground">Tarla Tipi:</span>
                   <p className="text-sm">{getFieldTypeLabel(typeProperties.FieldType)}</p>
                 </div>
+                <div>
+                  <span className="text-sm font-medium text-muted-foreground">Hissedar Durumu:</span>
+                  <p className="text-sm">{typeProperties.HasShareholder ? 'Var' : 'Yok'}</p>
+                </div>
               </div>
             </CardContent>
           </Card>
