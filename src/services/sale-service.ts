@@ -202,7 +202,65 @@ export class SaleService {
   }
 
   async deleteSale(id: number): Promise<void> {
-    await apiService.delete(API_ENDPOINTS.SALE_BY_ID(id.toString()));
+    try {
+      console.log(`Deleting sale with ID: ${id}`);
+      
+      // Önce sale bilgilerini al
+      const sale = await this.getSaleById(id);
+      console.log('Sale to be deleted:', sale);
+      
+      // Sale'i sil
+      await apiService.delete(API_ENDPOINTS.SALE_BY_ID(id.toString()));
+      console.log('Sale deleted successfully');
+      
+      // Eğer sale tamamlanmış durumda ise emlak durumunu geri döndür
+      if (sale.status === SaleStatus.Completed) {
+        await this.revertPropertyStatusAfterSaleDeletion(sale.propertyId, sale);
+      } else {
+        console.log('Sale was not completed, no property status update needed');
+      }
+      
+    } catch (error) {
+      console.error('Failed to delete sale:', error);
+      throw error;
+    }
+  }
+
+  // Satış silindiğinde emlak durumunu geri döndür
+  private async revertPropertyStatusAfterSaleDeletion(propertyId: number, deletedSale: Sale): Promise<void> {
+    try {
+      console.log(`Reverting property status after sale deletion for property ${propertyId}`);
+      
+      // Property bilgilerini al
+      const property = await propertyService.getPropertyById(propertyId);
+      console.log('Current property status:', property.status);
+      
+      let newStatus: string | null = null;
+      
+      // Mevcut duruma göre geri döndürme logic'i
+      if (property.status === 'Satıldı') {
+        // Satıldı -> Satılık'a döndür
+        newStatus = 'Satılık';
+        console.log('Property was sold, reverting to Satılık');
+      } else if (property.status === 'Kiralandı') {
+        // Kiralandı -> Kiralık'a döndür
+        newStatus = 'Kiralık';
+        console.log('Property was rented, reverting to Kiralık');
+      } else {
+        console.log(`Property status ${property.status} does not require reversion`);
+      }
+      
+      // Durum güncellemesi yap
+      if (newStatus) {
+        await propertyService.updatePropertyStatus(propertyId, newStatus as any);
+        console.log(`Property status updated from ${property.status} to ${newStatus}`);
+      }
+      
+    } catch (error) {
+      console.error('Failed to revert property status after sale deletion:', error);
+      // Property status güncellemesi başarısız olsa bile sale silme işlemini kesintiye uğratma
+      // Sadece log'la ve devam et
+    }
   }
 
   async getSalesByProperty(propertyId: number): Promise<Sale[]> {
