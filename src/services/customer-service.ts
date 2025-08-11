@@ -5,9 +5,7 @@ import { Customer, CreateCustomerRequest, UpdateCustomerRequest, ApiResponse, Pa
 export interface CustomerFilters {
   search?: string;
   customerType?: number;
-  provinceId?: number;
-  districtId?: number;
-  neighborhoodId?: number;
+  interestType?: number;
   minBudget?: number;
   maxBudget?: number;
   page?: number;
@@ -89,15 +87,9 @@ export class CustomerService {
           return false;
         }
 
-        // Location filters - Filter by customer preferences
-        // Note: For now, we'll implement basic filtering. In real implementation, 
-        // you might want to fetch customer province preferences from API
-        // This is a placeholder implementation
-        if (filters.provinceId || filters.districtId || filters.neighborhoodId) {
-          // Since Customer model doesn't directly store location data,
-          // we'll filter based on customer's province preferences if available
-          // This would need backend support to properly implement
-          console.log('Location filtering for customers would need backend API support');
+        // Interest type filter
+        if (filters.interestType !== undefined && customer.interestType !== filters.interestType) {
+          return false;
         }
 
         // Budget filters
