@@ -199,6 +199,19 @@ export class PropertyService {
           }
         }
 
+        // Location filters
+        if (filters.provinceId !== undefined && property.provinceId !== filters.provinceId) {
+          return false;
+        }
+
+        if (filters.districtId !== undefined && property.districtId !== filters.districtId) {
+          return false;
+        }
+
+        if (filters.neighborhoodId !== undefined && property.neighborhoodId !== filters.neighborhoodId) {
+          return false;
+        }
+
         // Price filters (based on TotalPrice in typeSpecificProperties)
         const totalPrice = property.typeSpecificProperties?.TotalPrice;
         if (totalPrice) {

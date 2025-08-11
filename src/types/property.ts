@@ -202,6 +202,9 @@ export interface PropertyFilters {
   search?: string;
   propertyType?: PropertyType;
   status?: PropertyStatus;
+  provinceId?: number;
+  districtId?: number;
+  neighborhoodId?: number;
   minPrice?: number;
   maxPrice?: number;
   page?: number;

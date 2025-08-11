@@ -171,6 +171,9 @@ export default function PropertiesPage() {
     search: '',
     propertyType: undefined,
     status: undefined,
+    provinceId: undefined,
+    districtId: undefined,
+    neighborhoodId: undefined,
     page: 1,
     limit: 5
   });
@@ -198,6 +201,20 @@ export default function PropertiesPage() {
     ...filters,
     search: debouncedFilters.search
   };
+
+  // Fetch districts for selected province
+  const { data: filteredDistricts = [] } = useQuery({
+    queryKey: ['districts', filters.provinceId],
+    queryFn: () => locationService.getDistrictsByProvince(filters.provinceId!),
+    enabled: !!filters.provinceId,
+  });
+
+  // Fetch neighborhoods for selected district
+  const { data: filteredNeighborhoods = [] } = useQuery({
+    queryKey: ['neighborhoods', filters.districtId],
+    queryFn: () => locationService.getNeighborhoodsByDistrict(filters.districtId!),
+    enabled: !!filters.districtId,
+  });
 
   // Fetch properties from API - before permission check to maintain hook order
   const { data: allProperties = [], isLoading, refetch } = useQuery({
@@ -380,6 +397,37 @@ export default function PropertiesPage() {
     return `${provinceName} / ${districtName} / ${neighborhoodName}`;
   };
 
+  // Location filter handlers
+  const handleProvinceFilterChange = (value: string) => {
+    const provinceId = value === 'ALL' ? undefined : parseInt(value);
+    setFilters({ 
+      ...filters, 
+      provinceId,
+      districtId: undefined, // Reset district when province changes
+      neighborhoodId: undefined, // Reset neighborhood when province changes
+      page: 1 // Reset to first page
+    });
+  };
+
+  const handleDistrictFilterChange = (value: string) => {
+    const districtId = value === 'ALL' ? undefined : parseInt(value);
+    setFilters({ 
+      ...filters, 
+      districtId,
+      neighborhoodId: undefined, // Reset neighborhood when district changes
+      page: 1 // Reset to first page
+    });
+  };
+
+  const handleNeighborhoodFilterChange = (value: string) => {
+    const neighborhoodId = value === 'ALL' ? undefined : parseInt(value);
+    setFilters({ 
+      ...filters, 
+      neighborhoodId,
+      page: 1 // Reset to first page
+    });
+  };
+
   const handleExport = () => {
     exportPropertiesToCSV(properties);
   };
@@ -471,72 +519,141 @@ export default function PropertiesPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="sm:col-span-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Başlık, aracı, müşteri veya notlar ile arama..."
-                    value={filters.search}
-                    onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                    className="pl-10"
-                  />
-                  {filters.search && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-                      onClick={() => setFilters({ ...filters, search: '' })}
-                    >
-                      ×
-                    </Button>
-                  )}
+            <div className="space-y-4">
+              {/* Search and Property Type - First Row */}
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="sm:col-span-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Başlık, aracı, müşteri veya notlar ile arama..."
+                      value={filters.search}
+                      onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                      className="pl-10"
+                    />
+                    {filters.search && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                        onClick={() => setFilters({ ...filters, search: '' })}
+                      >
+                        ×
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                
+                <Select
+                  value={filters.propertyType?.toString() || 'ALL'}
+                  onValueChange={(value) => setFilters({ 
+                    ...filters, 
+                    propertyType: value === 'ALL' ? undefined : parseInt(value) 
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Emlak Tipi" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">Tümü</SelectItem>
+                    <SelectItem value={PropertyType.Land.toString()}>Arsa</SelectItem>
+                    <SelectItem value={PropertyType.Field.toString()}>Tarla</SelectItem>
+                    <SelectItem value={PropertyType.Apartment.toString()}>Daire</SelectItem>
+                    <SelectItem value={PropertyType.Commercial.toString()}>İşyeri</SelectItem>
+                    <SelectItem value={PropertyType.SharedParcel.toString()}>Hisseli Parsel</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center gap-2"
+                    onClick={handleExport}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    <span className="hidden sm:inline">Dışa Aktar</span>
+                    <span className="sm:hidden">Export</span>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setFilters({ 
+                      search: '', 
+                      propertyType: undefined, 
+                      status: undefined, 
+                      provinceId: undefined, 
+                      districtId: undefined, 
+                      neighborhoodId: undefined, 
+                      page: 1, 
+                      limit: 5 
+                    })}
+                    className="text-muted-foreground hover:text-foreground w-full sm:w-auto"
+                  >
+                    <span className="hidden sm:inline">Filtreleri Temizle</span>
+                    <span className="sm:hidden">Temizle</span>
+                  </Button>
                 </div>
               </div>
-              
-              <Select
-                value={filters.propertyType?.toString() || 'ALL'}
-                onValueChange={(value) => setFilters({ 
-                  ...filters, 
-                  propertyType: value === 'ALL' ? undefined : parseInt(value) 
-                })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Emlak Tipi" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">Tümü</SelectItem>
-                  <SelectItem value={PropertyType.Land.toString()}>Arsa</SelectItem>
-                  <SelectItem value={PropertyType.Field.toString()}>Tarla</SelectItem>
-                  <SelectItem value={PropertyType.Apartment.toString()}>Daire</SelectItem>
-                  <SelectItem value={PropertyType.Commercial.toString()}>İşyeri</SelectItem>
-                  <SelectItem value={PropertyType.SharedParcel.toString()}>Hisseli Parsel</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Button 
-                  variant="outline" 
-                  className="flex items-center gap-2"
-                  onClick={handleExport}
+
+              {/* Location Filters - Second Row */}
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+                <Select
+                  value={filters.provinceId?.toString() || 'ALL'}
+                  onValueChange={handleProvinceFilterChange}
                 >
-                  <Download className="mr-2 h-4 w-4" />
-                  <span className="hidden sm:inline">Dışa Aktar</span>
-                  <span className="sm:hidden">Export</span>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setFilters({ search: '', propertyType: undefined, status: undefined, page: 1, limit: 5 })}
-                  className="text-muted-foreground hover:text-foreground w-full sm:w-auto"
+                  <SelectTrigger>
+                    <SelectValue placeholder="İl Seçin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">Tüm İller</SelectItem>
+                    {allProvinces.map((province) => (
+                      <SelectItem key={province.id} value={province.id.toString()}>
+                        {province.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={filters.districtId?.toString() || 'ALL'}
+                  onValueChange={handleDistrictFilterChange}
+                  disabled={!filters.provinceId}
                 >
-                  <span className="hidden sm:inline">Filtreleri Temizle</span>
-                  <span className="sm:hidden">Temizle</span>
-                </Button>
+                  <SelectTrigger>
+                    <SelectValue placeholder={filters.provinceId ? "İlçe Seçin" : "Önce İl Seçin"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">Tüm İlçeler</SelectItem>
+                    {filteredDistricts.map((district) => (
+                      <SelectItem key={district.id} value={district.id.toString()}>
+                        {district.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={filters.neighborhoodId?.toString() || 'ALL'}
+                  onValueChange={handleNeighborhoodFilterChange}
+                  disabled={!filters.districtId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={filters.districtId ? "Mahalle Seçin" : "Önce İlçe Seçin"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">Tüm Mahalleler</SelectItem>
+                    {filteredNeighborhoods.map((neighborhood) => (
+                      <SelectItem key={neighborhood.id} value={neighborhood.id.toString()}>
+                        {neighborhood.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             
             {/* Filter Summary */}
-            {(filters.search || filters.propertyType !== undefined || filters.status !== undefined) && (
+            {(filters.search || filters.propertyType !== undefined || filters.status !== undefined || 
+              filters.provinceId !== undefined || filters.districtId !== undefined || filters.neighborhoodId !== undefined) && (
               <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                 <span>Aktif filtreler:</span>
                 {filters.search && (
@@ -558,6 +675,48 @@ export default function PropertiesPage() {
                           filters.propertyType === PropertyType.Commercial ? 'İşyeri' : 'Hisseli Parsel'}
                     <button 
                       onClick={() => setFilters({ ...filters, propertyType: undefined })}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {filters.provinceId !== undefined && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    İl: {allProvinces.find(p => p.id === filters.provinceId)?.name || 'Bilinmiyor'}
+                    <button 
+                      onClick={() => setFilters({ 
+                        ...filters, 
+                        provinceId: undefined, 
+                        districtId: undefined, 
+                        neighborhoodId: undefined 
+                      })}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {filters.districtId !== undefined && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    İlçe: {allDistricts.find(d => d.id === filters.districtId)?.name || 'Bilinmiyor'}
+                    <button 
+                      onClick={() => setFilters({ 
+                        ...filters, 
+                        districtId: undefined, 
+                        neighborhoodId: undefined 
+                      })}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {filters.neighborhoodId !== undefined && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    Mahalle: {allNeighborhoods.find(n => n.id === filters.neighborhoodId)?.name || 'Bilinmiyor'}
+                    <button 
+                      onClick={() => setFilters({ ...filters, neighborhoodId: undefined })}
                       className="ml-1 hover:text-destructive"
                     >
                       ×
