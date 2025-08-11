@@ -700,7 +700,8 @@ export function SaleForm({ sale, properties, customers, onClose }: SaleFormProps
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* İlk satır: Satış Fiyatı + Alınan Komisyon */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="salePrice">Satış Fiyatı (₺) *</Label>
                 <Input
@@ -712,6 +713,7 @@ export function SaleForm({ sale, properties, customers, onClose }: SaleFormProps
                   onChange={(e) => setFormData({ ...formData, salePrice: parseFloat(e.target.value) || 0 })}
                   placeholder="0"
                   required
+                  className="text-lg font-mono"
                 />
               </div>
 
@@ -726,9 +728,13 @@ export function SaleForm({ sale, properties, customers, onClose }: SaleFormProps
                   onChange={(e) => setFormData({ ...formData, commission: parseFloat(e.target.value) || 0 })}
                   placeholder="0"
                   required
+                  className="text-lg font-mono"
                 />
               </div>
+            </div>
 
+            {/* İkinci satır: Komisyon Oranı + Giderler */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="commissionRate">Komisyon Oranı (%)</Label>
                 <Input
@@ -741,6 +747,7 @@ export function SaleForm({ sale, properties, customers, onClose }: SaleFormProps
                   onChange={(e) => setFormData({ ...formData, commissionRate: parseFloat(e.target.value) || 0 })}
                   placeholder="0.0"
                   disabled
+                  className="text-lg font-mono"
                 />
                 <p className="text-xs text-muted-foreground">Otomatik hesaplanır</p>
               </div>
@@ -755,6 +762,7 @@ export function SaleForm({ sale, properties, customers, onClose }: SaleFormProps
                   value={formData.expenses || ''}
                   onChange={(e) => setFormData({ ...formData, expenses: parseFloat(e.target.value) || 0 })}
                   placeholder="0"
+                  className="text-lg font-mono"
                 />
               </div>
             </div>
