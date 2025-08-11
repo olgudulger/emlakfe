@@ -130,10 +130,27 @@ export class SaleService {
   }
 
   async getSaleById(id: number): Promise<Sale> {
-    const response = await apiService.get<Sale>(
+    console.log('getSaleById called with:', id, typeof id);
+    
+    if (!id || typeof id !== 'number') {
+      throw new Error(`Geçersiz sale ID: ${id} (type: ${typeof id})`);
+    }
+    
+    const response = await apiService.get<any>(
       API_ENDPOINTS.SALE_BY_ID(id.toString())
     );
-    return response;
+    
+    // Backend'ten dönen format: { success: true, data: {...} }
+    if (response && response.success && response.data) {
+      return response.data;
+    }
+    
+    // Eğer direkt Sale objesi dönerse
+    if (response && response.id) {
+      return response;
+    }
+    
+    throw new Error('Sale bulunamadı');
   }
 
   async createSale(saleData: CreateSaleRequest): Promise<Sale> {
@@ -153,17 +170,20 @@ export class SaleService {
 
   async updateSale(saleData: UpdateSaleRequest): Promise<Sale> {
     console.log('Updating sale:', saleData);
+    console.log('API Endpoint:', API_ENDPOINTS.SALE_BY_ID(saleData.id.toString()));
     
-    // Önce mevcut sale'i al
-    const currentSale = await this.getSaleById(saleData.id);
+    if (!saleData.id) {
+      throw new Error(`UpdateSale: Geçersiz sale ID: ${saleData.id}`);
+    }
     
     const response = await apiService.put<Sale>(
       API_ENDPOINTS.SALE_BY_ID(saleData.id.toString()),
       saleData
     );
     
-    // Eğer satış durumu Tamamlandı'ya değiştiyse ve daha önce tamamlanmamışsa
-    if (saleData.status === SaleStatus.Completed && currentSale.status !== SaleStatus.Completed) {
+    // Eğer satış durumu Tamamlandı'ya değiştiyse emlak durumunu güncelle
+    // (Cancel işleminde property status update zaten cancelSale'de yapılıyor)
+    if (saleData.status === SaleStatus.Completed) {
       await this.updatePropertyStatusAfterSale(saleData.propertyId);
     }
     
@@ -203,33 +223,46 @@ export class SaleService {
 
   async cancelSale(id: number): Promise<Sale> {
     try {
-      console.log(`Cancelling sale with ID: ${id}`);
+      console.log(`Cancelling sale with ID: ${id}`, typeof id);
+      
+      // ID kontrolü
+      if (!id || typeof id !== 'number') {
+        throw new Error(`Geçersiz sale ID: ${id}`);
+      }
       
       // Önce sale bilgilerini al
       const sale = await this.getSaleById(id);
       console.log('Sale to be cancelled:', sale);
+      console.log('Sale object properties:', Object.getOwnPropertyNames(sale));
+      console.log('All sale properties:', JSON.stringify(sale, null, 2));
       
       // Eğer sale zaten iptal edilmişse error fırlat
       if (sale.status === SaleStatus.Cancelled) {
         throw new Error('Bu satış zaten iptal edilmiş');
       }
       
-      // Sale'i iptal edildi statüsüne güncelle
-      const updateData: UpdateSaleRequest = {
-        id: sale.id,
+      // Sale'i iptal edildi statüsüne güncelle - Sale form'daki yaklaşımı kullan
+      console.log('Sale to update:', sale);
+      console.log('Original sale ID:', sale.id, typeof sale.id);
+      
+      // Sale form'daki gibi tüm verileri gönder
+      const updateData = {
         propertyId: sale.propertyId,
-        buyerCustomerId: sale.buyerCustomerId,
+        buyerCustomerId: sale.buyerCustomerId, 
         salePrice: sale.salePrice,
         commission: sale.commission,
         expenses: sale.expenses || 0,
-        commissionRate: sale.commissionRate || 0,
+        commissionRate: sale.commissionRate,
         saleDate: sale.saleDate,
         notes: sale.notes || '',
-        status: SaleStatus.Cancelled
+        status: SaleStatus.Cancelled,
+        id: sale.id // Sale'den gelen id'yi kullan (artık doğru gelecek)
       };
       
-      const updatedSale = await this.updateSale(updateData);
+      console.log('Update data to send:', updateData);
       
+      // Sale'i güncelle
+      const updatedSale = await this.updateSale(updateData);
       console.log('Sale cancelled successfully');
       
       // Eğer sale daha önce tamamlanmışsa emlak durumunu geri döndür

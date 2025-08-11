@@ -137,8 +137,16 @@ export default function SalesPage() {
   });
 
   const handleCancel = async (id: number) => {
+    console.log('handleCancel called with:', id, typeof id);
+    
+    if (!id) {
+      alert('Geçersiz satış ID');
+      return;
+    }
+    
     if (window.confirm('Bu satışı iptal etmek istediğinizden emin misiniz?')) {
       try {
+        console.log('Calling cancelMutation with ID:', id);
         await cancelMutation.mutateAsync(id);
       } catch (error: any) {
         console.error('Cancel failed:', error);
