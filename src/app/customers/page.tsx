@@ -54,6 +54,7 @@ import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { CustomerForm } from '@/components/forms/customer-form';
 import { useRoleProtection } from '@/hooks/use-role-protection';
 import { customerService, CustomerFilters } from '@/services/customer-service';
+import { locationService } from '@/services/location-service';
 import { Customer, CustomerType, InterestType } from '@/types';
 import { exportCustomersToCSV } from '@/utils/export';
 
@@ -113,6 +114,9 @@ export default function CustomersPage() {
   const [filters, setFilters] = useState<CustomerFilters>({
     search: '',
     customerType: undefined,
+    provinceId: undefined,
+    districtId: undefined,
+    neighborhoodId: undefined,
     page: 1,
     limit: 5
   });
@@ -144,6 +148,39 @@ export default function CustomersPage() {
     queryKey: ['customers'],
     queryFn: () => customerService.getCustomers(),
     enabled: hasPermission, // Only fetch when user has permission
+  });
+
+  // Fetch all locations for filtering
+  const { data: allProvinces = [] } = useQuery({
+    queryKey: ['provinces'],
+    queryFn: () => locationService.getProvinces(),
+    enabled: hasPermission,
+  });
+
+  const { data: allDistricts = [] } = useQuery({
+    queryKey: ['districts'],
+    queryFn: () => locationService.getAllDistricts(),
+    enabled: hasPermission,
+  });
+
+  const { data: allNeighborhoods = [] } = useQuery({
+    queryKey: ['neighborhoods'],
+    queryFn: () => locationService.getAllNeighborhoods(),
+    enabled: hasPermission,
+  });
+
+  // Fetch districts for selected province
+  const { data: filteredDistricts = [] } = useQuery({
+    queryKey: ['districts', filters.provinceId],
+    queryFn: () => locationService.getDistrictsByProvince(filters.provinceId!),
+    enabled: !!filters.provinceId,
+  });
+
+  // Fetch neighborhoods for selected district
+  const { data: filteredNeighborhoods = [] } = useQuery({
+    queryKey: ['neighborhoods', filters.districtId],
+    queryFn: () => locationService.getNeighborhoodsByDistrict(filters.districtId!),
+    enabled: !!filters.districtId,
   });
 
   // Filter customers client-side
@@ -351,7 +388,7 @@ export default function CustomersPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-7">
               <div className="sm:col-span-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -391,6 +428,74 @@ export default function CustomersPage() {
                   <SelectItem value={CustomerType.AlıcıSatıcı.toString()}>Alıcı/Satıcı</SelectItem>
                 </SelectContent>
               </Select>
+
+              {/* İl Filtresi */}
+              <Select
+                value={filters.provinceId?.toString() || 'ALL'}
+                onValueChange={(value) => setFilters({ 
+                  ...filters, 
+                  provinceId: value === 'ALL' ? undefined : parseInt(value),
+                  districtId: undefined, // Reset dependent filters
+                  neighborhoodId: undefined
+                })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="İl" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Tüm İller</SelectItem>
+                  {allProvinces.map((province) => (
+                    <SelectItem key={province.id} value={province.id.toString()}>
+                      {province.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* İlçe Filtresi */}
+              <Select
+                value={filters.districtId?.toString() || 'ALL'}
+                onValueChange={(value) => setFilters({ 
+                  ...filters, 
+                  districtId: value === 'ALL' ? undefined : parseInt(value),
+                  neighborhoodId: undefined // Reset dependent filter
+                })}
+                disabled={!filters.provinceId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="İlçe" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Tüm İlçeler</SelectItem>
+                  {filteredDistricts.map((district) => (
+                    <SelectItem key={district.id} value={district.id.toString()}>
+                      {district.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Mahalle Filtresi */}
+              <Select
+                value={filters.neighborhoodId?.toString() || 'ALL'}
+                onValueChange={(value) => setFilters({ 
+                  ...filters, 
+                  neighborhoodId: value === 'ALL' ? undefined : parseInt(value)
+                })}
+                disabled={!filters.districtId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Mahalle" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Tüm Mahalleler</SelectItem>
+                  {filteredNeighborhoods.map((neighborhood) => (
+                    <SelectItem key={neighborhood.id} value={neighborhood.id.toString()}>
+                      {neighborhood.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               
               <div className="flex flex-col sm:flex-row gap-2">
                 <Button 
@@ -404,7 +509,15 @@ export default function CustomersPage() {
                 </Button>
                 <Button 
                   variant="outline" 
-                  onClick={() => setFilters({ search: '', customerType: undefined, page: 1, limit: 5 })}
+                  onClick={() => setFilters({ 
+                    search: '', 
+                    customerType: undefined, 
+                    provinceId: undefined, 
+                    districtId: undefined, 
+                    neighborhoodId: undefined, 
+                    page: 1, 
+                    limit: 5 
+                  })}
                   className="text-muted-foreground hover:text-foreground w-full sm:w-auto"
                 >
                   <span className="hidden sm:inline">Filtreleri Temizle</span>
@@ -414,7 +527,7 @@ export default function CustomersPage() {
             </div>
             
             {/* Filter Summary */}
-            {(filters.search || filters.customerType !== undefined) && (
+            {(filters.search || filters.customerType !== undefined || filters.provinceId || filters.districtId || filters.neighborhoodId) && (
               <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                 <span>Aktif filtreler:</span>
                 {filters.search && (
@@ -434,6 +547,39 @@ export default function CustomersPage() {
                           filters.customerType === CustomerType.Satıcı ? 'Satıcı' : 'Alıcı/Satıcı'}
                     <button 
                       onClick={() => setFilters({ ...filters, customerType: undefined })}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {filters.provinceId && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    İl: {allProvinces.find(p => p.id === filters.provinceId)?.name}
+                    <button 
+                      onClick={() => setFilters({ ...filters, provinceId: undefined, districtId: undefined, neighborhoodId: undefined })}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {filters.districtId && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    İlçe: {filteredDistricts.find(d => d.id === filters.districtId)?.name}
+                    <button 
+                      onClick={() => setFilters({ ...filters, districtId: undefined, neighborhoodId: undefined })}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {filters.neighborhoodId && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    Mahalle: {filteredNeighborhoods.find(n => n.id === filters.neighborhoodId)?.name}
+                    <button 
+                      onClick={() => setFilters({ ...filters, neighborhoodId: undefined })}
                       className="ml-1 hover:text-destructive"
                     >
                       ×
