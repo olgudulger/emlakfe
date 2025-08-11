@@ -78,7 +78,16 @@ export class PropertyService {
       console.log('🔑 Token length:', token?.length || 0);
       console.log('🔑 Token prefix:', token ? token.substring(0, 20) + '...' : 'N/A');
       
-      const response = await apiService.get<any>(API_ENDPOINTS.PROPERTIES);
+      // Explicitly create a config object to avoid any automatic serialization of query params
+      const config = {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        // Explicitly set params to empty to avoid any automatic serialization
+        params: {}
+      };
+      
+      const response = await apiService.get<any>(API_ENDPOINTS.PROPERTIES, config);
       console.log('Properties API Response:', response);
       console.log('Response type:', typeof response);
       
@@ -142,6 +151,11 @@ export class PropertyService {
         console.error('   - Enum mismatch between frontend and backend');
         console.error('   - Missing required headers');
         console.error('   - Invalid request format');
+        
+        // Log specific error for HasShareholder issue
+        if (error.response?.data && error.response.data.includes('HasShareholder')) {
+          console.error('🚨 HasShareholder field error detected. This is likely due to the backend not supporting this field in GET requests yet.');
+        }
       }
       
       // For other errors, still return empty array to prevent crash
@@ -223,6 +237,9 @@ export class PropertyService {
             return false;
           }
         }
+
+        // Skip HasShareholder filtering - this is only used in the form, not for filtering
+        // This prevents the field from being included in query parameters
 
         return true;
       });
