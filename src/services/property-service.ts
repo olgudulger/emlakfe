@@ -1,6 +1,6 @@
 import { apiService } from './api';
 import { API_ENDPOINTS } from '@/constants/api';
-import { Property, CreatePropertyRequest, UpdatePropertyRequest, PropertyFilters, PriceHistoryEntry, PropertyStatus } from '@/types';
+import { Property, CreatePropertyRequest, UpdatePropertyRequest, PropertyFilters, PriceHistoryEntry, PropertyStatus, PropertyType } from '@/types';
 
 // Status'a göre sıralama önceliği belirleme fonksiyonu
 const getStatusPriority = (status: any): number => {
