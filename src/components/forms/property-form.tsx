@@ -205,7 +205,11 @@ export function PropertyForm({ property, onSubmit, onCancel, isLoading }: Proper
       setSelectedDistrictId(undefined);
     } else {
       // Edit mode - load property data
-      reset({
+      console.log('Loading property data for edit:', property);
+      console.log('TypeSpecificProperties:', property.typeSpecificProperties);
+      console.log('HasShareholder value:', property.typeSpecificProperties?.HasShareholder);
+      
+      const formData = {
         title: property.title,
         propertyType: property.propertyType,
         provinceId: property.provinceId,
@@ -217,7 +221,10 @@ export function PropertyForm({ property, onSubmit, onCancel, isLoading }: Proper
         notes: property.notes,
         customerId: property.customerId,
         ...property.typeSpecificProperties
-      });
+      };
+      
+      console.log('Form data being set:', formData);
+      reset(formData);
       setSelectedPropertyType(property.propertyType);
       setSelectedProvinceId(property.provinceId);
       setSelectedDistrictId(property.districtId);
@@ -256,6 +263,7 @@ export function PropertyForm({ property, onSubmit, onCancel, isLoading }: Proper
     try {
       console.log('=== FORM SUBMIT STARTED ===');
       console.log('Raw form data received:', data);
+      console.log('HasShareholder in submitted data:', data.HasShareholder);
       console.log('Form errors:', errors);
       
       // Prepare type-specific properties
@@ -609,6 +617,7 @@ export function PropertyForm({ property, onSubmit, onCancel, isLoading }: Proper
                     checked={watch('HasShareholder') || false}
                     onCheckedChange={(checked: boolean) => {
                       setValue('HasShareholder', checked === true);
+                      console.log('HasShareholder changed to:', checked);
                     }}
                   />
                   <Label htmlFor="HasShareholder" className="cursor-pointer">
