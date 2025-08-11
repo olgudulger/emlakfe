@@ -238,8 +238,15 @@ export class PropertyService {
           }
         }
 
-        // Skip HasShareholder filtering - this is only used in the form, not for filtering
-        // This prevents the field from being included in query parameters
+        // HasShareholder filter for Field type properties
+        if (filters.propertyType === PropertyType.Field && 
+            filters.hasShareholder !== undefined && 
+            property.typeSpecificProperties?.HasShareholder !== undefined) {
+          // Only filter if both the filter value and property value are defined
+          if (property.typeSpecificProperties.HasShareholder !== filters.hasShareholder) {
+            return false;
+          }
+        }
 
         return true;
       });

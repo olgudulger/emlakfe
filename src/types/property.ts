@@ -209,6 +209,7 @@ export interface PropertyFilters {
   maxPrice?: number;
   page?: number;
   limit?: number;
+  hasShareholder?: boolean; // For Field type properties only
 }
 
 // Price History Interface

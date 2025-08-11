@@ -24,6 +24,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Table,
@@ -174,6 +176,7 @@ export default function PropertiesPage() {
     provinceId: undefined,
     districtId: undefined,
     neighborhoodId: undefined,
+    hasShareholder: undefined,
     page: 1,
     limit: 5
   });
@@ -583,6 +586,7 @@ export default function PropertiesPage() {
                       provinceId: undefined, 
                       districtId: undefined, 
                       neighborhoodId: undefined, 
+                      hasShareholder: undefined,
                       page: 1, 
                       limit: 5 
                     })}
@@ -596,6 +600,30 @@ export default function PropertiesPage() {
 
               {/* Location Filters - Second Row */}
               <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+                {/* HasShareholder filter for Field properties */}
+                {filters.propertyType === PropertyType.Field && (
+                  <div className="flex items-center space-x-2 p-2 border rounded-md">
+                    <div className="flex-1">
+                      <Label htmlFor="hasShareholder" className="font-medium">
+                        Hisseli Tarla
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Sadece hissedar içeren tarlaları göster
+                      </p>
+                    </div>
+                    <Switch
+                      id="hasShareholder"
+                      checked={filters.hasShareholder === true}
+                      onCheckedChange={(checked) => {
+                        setFilters({ 
+                          ...filters, 
+                          hasShareholder: checked ? true : undefined,
+                          page: 1
+                        });
+                      }}
+                    />
+                  </div>
+                )}
                 <Select
                   value={filters.provinceId?.toString() || 'ALL'}
                   onValueChange={handleProvinceFilterChange}
@@ -653,7 +681,8 @@ export default function PropertiesPage() {
             
             {/* Filter Summary */}
             {(filters.search || filters.propertyType !== undefined || filters.status !== undefined || 
-              filters.provinceId !== undefined || filters.districtId !== undefined || filters.neighborhoodId !== undefined) && (
+              filters.provinceId !== undefined || filters.districtId !== undefined || filters.neighborhoodId !== undefined ||
+              filters.hasShareholder !== undefined) && (
               <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                 <span>Aktif filtreler:</span>
                 {filters.search && (
@@ -717,6 +746,17 @@ export default function PropertiesPage() {
                     Mahalle: {allNeighborhoods.find(n => n.id === filters.neighborhoodId)?.name || 'Bilinmiyor'}
                     <button 
                       onClick={() => setFilters({ ...filters, neighborhoodId: undefined })}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {filters.hasShareholder !== undefined && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    Hisseli Tarla
+                    <button 
+                      onClick={() => setFilters({ ...filters, hasShareholder: undefined })}
                       className="ml-1 hover:text-destructive"
                     >
                       ×
