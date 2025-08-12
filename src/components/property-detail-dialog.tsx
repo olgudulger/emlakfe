@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Property, PropertyType, PropertyStatus, LandZoneStatus, LandType, FieldType, HeatingType, ElevatorType, ParkingType, FornitureStatus, WorkplaceType, MezzanineStatus, BasementStatus, UsageStatus } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MapPin, Info, History } from 'lucide-react';
+import { MapPin, Info, History, Phone, User } from 'lucide-react';
 import { PropertyPriceHistory } from './property-price-history';
 
 interface PropertyDetailDialogProps {
@@ -15,6 +16,7 @@ interface PropertyDetailDialogProps {
   isOpen: boolean;
   onClose: () => void;
   customerName?: string;
+  customerPhone?: string;
   locationString?: string;
 }
 
@@ -291,9 +293,10 @@ const getUsageStatusLabel = (status: number | string | undefined) => {
   }
 };
 
-export function PropertyDetailDialog({ property, isOpen, onClose, customerName, locationString }: PropertyDetailDialogProps) {
+export function PropertyDetailDialog({ property, isOpen, onClose, customerName, customerPhone, locationString }: PropertyDetailDialogProps) {
   const [activeTab, setActiveTab] = useState('details');
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   
   if (!property) return null;
 
@@ -658,14 +661,36 @@ export function PropertyDetailDialog({ property, isOpen, onClose, customerName, 
                     <span className="text-sm font-medium text-muted-foreground">Müşteri:</span>
                     <p className="text-sm">{customerName || 'Bilinmiyor'}</p>
                   </div>
+                  {customerPhone && (
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Müşteri Telefonu:</span>
+                      {isMobile ? (
+                        <a href={`tel:${customerPhone}`} className="text-sm text-blue-600 flex items-center gap-1 mt-1">
+                          {customerPhone}
+                          <Phone className="h-3 w-3" />
+                        </a>
+                      ) : (
+                        <p className="text-sm">{customerPhone}</p>
+                      )}
+                    </div>
+                  )}
                   <div>
                     <span className="text-sm font-medium text-muted-foreground">Aracı:</span>
-                    <p className="text-sm">{property.intermediaryFullName}</p>
+                    <p className="text-sm">{property.intermediaryFullName || 'Belirtilmemiş'}</p>
                   </div>
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Aracı Telefon:</span>
-                    <p className="text-sm">{property.intermediaryPhone}</p>
-                  </div>
+                  {property.intermediaryPhone && (
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Aracı Telefon:</span>
+                      {isMobile ? (
+                        <a href={`tel:${property.intermediaryPhone}`} className="text-sm text-blue-600 flex items-center gap-1 mt-1">
+                          {property.intermediaryPhone}
+                          <Phone className="h-3 w-3" />
+                        </a>
+                      ) : (
+                        <p className="text-sm">{property.intermediaryPhone}</p>
+                      )}
+                    </div>
+                  )}
                   <div>
                     <span className="text-sm font-medium text-muted-foreground">Durum:</span>
                     <p className="text-sm">{getPropertyStatusLabel(property.status)}</p>

@@ -387,6 +387,11 @@ export default function PropertiesPage() {
     const customer = allCustomers.find(c => c.id === customerId);
     return customer ? customer.fullName : 'Bilinmiyor';
   };
+  
+  const getCustomerPhone = (customerId: number) => {
+    const customer = allCustomers.find(c => c.id === customerId);
+    return customer ? customer.phone : '';
+  };
 
   const getLocationString = (provinceId: number, districtId: number, neighborhoodId: number) => {
     const province = allProvinces.find(p => p.id === provinceId);
@@ -1112,6 +1117,7 @@ export default function PropertiesPage() {
             setPropertyForDetail(null);
           }}
           customerName={propertyForDetail ? getCustomerName(propertyForDetail.customerId) : undefined}
+          customerPhone={propertyForDetail ? getCustomerPhone(propertyForDetail.customerId) : undefined}
           locationString={propertyForDetail ? getLocationString(propertyForDetail.provinceId, propertyForDetail.districtId, propertyForDetail.neighborhoodId) : undefined}
         />
       </div>
