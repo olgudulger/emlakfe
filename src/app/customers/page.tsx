@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   ChevronLeft,
   ChevronRight,
@@ -14,7 +15,8 @@ import {
   Trash2,
   Eye,
   Download,
-  MoreHorizontal
+  MoreHorizontal,
+  Phone
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -109,6 +111,7 @@ const getInterestTypeLabel = (interestType: InterestType) => {
 export default function CustomersPage() {
   const { hasPermission } = useRoleProtection();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   
   const [filters, setFilters] = useState<CustomerFilters>({
     search: '',
@@ -533,7 +536,14 @@ export default function CustomersPage() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="text-sm">{customer.phone}</div>
+                            {isMobile ? (
+                              <a href={`tel:${customer.phone}`} className="text-sm text-blue-600 flex items-center gap-1">
+                                {customer.phone}
+                                <Phone className="h-3 w-3" />
+                              </a>
+                            ) : (
+                              <div className="text-sm">{customer.phone}</div>
+                            )}
                           </TableCell>
                           <TableCell>
                             {getCustomerTypeBadge(customer.customerType)}
@@ -563,6 +573,14 @@ export default function CustomersPage() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>İşlemler</DropdownMenuLabel>
+                                {isMobile && (
+                                  <DropdownMenuItem asChild>
+                                    <a href={`tel:${customer.phone}`} className="flex items-center">
+                                      <Phone className="mr-2 h-4 w-4 text-green-600" />
+                                      Ara
+                                    </a>
+                                  </DropdownMenuItem>
+                                )}
                                 <DropdownMenuItem onClick={() => openEditForm(customer)}>
                                   <Edit className="mr-2 h-4 w-4" />
                                   Düzenle
@@ -591,7 +609,10 @@ export default function CustomersPage() {
                       <div className="flex justify-between items-start mb-3">
                         <div>
                           <h3 className="font-semibold text-lg">{customer.fullName}</h3>
-                          <p className="text-sm text-muted-foreground">{customer.phone}</p>
+                          <a href={`tel:${customer.phone}`} className="text-sm text-blue-600 flex items-center gap-1">
+                            {customer.phone}
+                            <Phone className="h-3 w-3" />
+                          </a>
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -601,6 +622,12 @@ export default function CustomersPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>İşlemler</DropdownMenuLabel>
+                            <DropdownMenuItem asChild>
+                              <a href={`tel:${customer.phone}`} className="flex items-center">
+                                <Phone className="mr-2 h-4 w-4 text-green-600" />
+                                Ara
+                              </a>
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openEditForm(customer)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Düzenle
